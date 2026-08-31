@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Cuenta el Dinero! - Juego Educativo</title>
+    <!-- Usamos Tailwind CSS para un estilizado rápido y adaptable -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+        body {
+            font-family: 'Comic Neue', cursive, sans-serif;
+            background-color: #f0fdf4; /* Fondo verde clarito y alegre */
+            /* Evitar scroll horizontal en escritorio */
+            overflow-x: hidden; 
+        }
+
+        /* Estilos base para el dinero para darles volumen */
+        .dinero-item {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: absolute; /* Para posicionarlos aleatoriamente en la mesa */
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .dinero-item:hover {
+            transform: scale(1.1);
+            box-shadow: 3px 6px 12px rgba(0,0,0,0.3);
+            z-index: 10; /* Traer al frente al hacer hover */
+        }
+
+        /* --- BILLETES --- */
+        .billete {
+            width: 140px;
+            height: 75px;
+            border-radius: 6px;
+            position: absolute;
+            box-shadow: 2px 5px 10px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 8px;
+            box-sizing: border-box;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.2);
+            /* Si prefieres usar una imagen tuya, descomenta la siguiente línea y pon tu ruta: */
+            /* background-size: cover; background-position: center; */
+        }
+
+        .billete-5 { 
+            background: linear-gradient(135deg, #718096, #a0aec0, #cbd5e0); 
+            border-color: #4a5568; 
+            color: #2d3748;
+        } 
+        .billete-10 { 
+            background: linear-gradient(135deg, #e53e3e, #f56565, #feb2b2); 
+            border-color: #9b2c2c; 
+            color: #742a2a;
+        } 
+        .billete-20 { 
+            background: linear-gradient(135deg, #3182ce, #63b3ed, #bee3f8); 
+            border-color: #2b6cb0; 
+            color: #1a365d;
+        } 
+        .billete-50 { 
+            background: linear-gradient(135deg, #dd6b20, #ed8936, #fbd38d); 
+            border-color: #9c4221; 
+            color: #652b19;
+        }
+
+        /* Banda holográfica y detalles visuales del billete */
+        .billete .holo-band {
+            width: 14px;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(200,230,255,0.3), rgba(255,255,255,0.8));
+            border-left: 1px dashed rgba(255,255,255,0.6);
+            border-right: 1px dashed rgba(255,255,255,0.6);
+            margin-right: 4px;
+        }
+
+        .billete .valor-grande {
+            font-size: 1.7rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .billete .info-col {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: space-between;
+            height: 100%;
+            z-index: 2;
+        }
+
+        .billete .eu-flag {
+            width: 18px;
+            height: 12px;
+            background-color: #003399;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffcc00;
+            font-size: 8px;
+        }
+
+        .billete .motivo-arquitectonico {
+            position: absolute;
+            right: 28px;
+            bottom: 6px;
+            opacity: 0.25;
+        }
+
+        /* --- MONEDAS --- */
+        .moneda {
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .moneda svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            border-radius: 50%;
+            box-shadow: 2px 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .moneda .moneda-contenido {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.4);
+        }
+
+        .moneda span.val { font-size: 1.8rem; font-weight: 900; }
+        .moneda span.sym { font-size: 0.8rem; font-weight: bold; }
+
+        /* Bimetálicas (1€ y 2€) */
+        .moneda-1, .moneda-2 {
+            color: #222;
+        }
+        .moneda-1 { width: 80px; height: 80px; }
+        .moneda-2 { width: 85px; height: 85px; }
+
+        /* Oro nórdico (10c, 20c, 50c) */
+        .moneda-oro {
+            color: #4a3600;
+        }
+        .moneda-50c { width: 75px; height: 75px; }
+        .moneda-20c { width: 70px; height: 70px; }
+        .moneda-10c { width: 65px; height: 65px; }
+        .moneda-oro span.val { font-size: 1.6rem; }
+
+        /* Acero recubierto de cobre (1c, 2c, 5c) */
+        .moneda-cobre {
+            color: #ffe8d6;
+        }
+        .moneda-cobre .moneda-contenido {
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }
+        .moneda-5c { width: 60px; height: 60px; }
+        .moneda-2c { width: 55px; height: 55px; }
+        .moneda-1c { width: 50px; height: 50px; }
+        .moneda-cobre span.val { font-size: 1.4rem; }
+
+        /* El tapete donde caen las monedas */
+        #mesa {
+            background-color: #2f855a; /* Verde tapete */
+            border: 10px solid #7b341e; /* Borde madera */
+            border-radius: 20px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden; /* Para que nada salga del tapete */
+            min-height: 60vh; /* Solución: Altura mínima para que no colapse */
+        }
+        
+        /* Animación para el mensaje */
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-blue-500 text-white p-4 shadow-md flex justify-between items-center z-10 relative">
+        <h1 class="text-4xl tracking-wide drop-shadow-md flex items-center gap-2">
+            <span>💰</span> ¡Cuenta el Dinero!
+        </h1>
+        
+        <div class="flex items-center gap-6">
+            <div class="bg-white/20 p-2 rounded-xl flex items-center gap-3">
+                <label for="dificultad" class="text-xl font-bold">Nivel:</label>
+                <select id="dificultad" class="text-blue-900 text-xl font-bold py-1 px-3 rounded cursor-pointer border-2 border-transparent focus:border-white outline-none">
+                    <option value="facil">Fácil (Billetes y Euros)</option>
+                    <option value="medio">Medio (Hasta 10 céntimos)</option>
+                    <option value="dificil">Difícil (Todas las monedas)</option>
+                </select>
+            </div>
+            
+            <div class="bg-yellow-400 text-yellow-900 px-4 py-2 rounded-xl font-bold text-2xl shadow-inner border-2 border-yellow-500">
+                Racha: <span id="racha-counter">0</span> ⭐
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex p-6 gap-6">
+        <!-- Panel lateral (opcional para futuras expansiones, ahora centramos la mesa) -->
+        <div class="flex-grow flex flex-col h-full w-full max-w-6xl mx-auto">
+            
+            <!-- Mensaje de Feedback -->
+            <div id="feedback-container" class="h-16 flex justify-center items-center mb-4">
+                <div id="mensaje" class="text-3xl font-bold text-transparent hidden transition-all duration-300">
+                    ¡Preparado!
+                </div>
+            </div>
+
+            <!-- La Mesa -->
+            <div id="mesa" class="flex-grow w-full relative">
+                <!-- Los elementos generados irán aquí -->
+                <div id="instruccion-mesa" class="absolute inset-0 flex items-center justify-center text-white/50 text-4xl pointer-events-none">
+                    Generando reto...
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <footer class="bg-gray-100 border-t-4 border-gray-300 p-6 shadow-inner z-10 relative">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-center items-center gap-6">
+            <label for="respuesta" class="text-3xl text-gray-700 font-bold">Total en la mesa:</label>
+            
+            <div class="flex items-center gap-2">
+                <input type="number" id="respuesta" step="0.01" min="0" placeholder="Ej: 12.50" 
+                    class="text-4xl text-center w-48 py-3 rounded-xl border-4 border-blue-300 focus:border-blue-500 focus:outline-none shadow-sm font-bold text-gray-800"
+                    autocomplete="off">
+                <span class="text-4xl text-gray-700 font-bold">€</span>
+            </div>
+
+            <button id="btn-comprobar" class="bg-green-500 hover:bg-green-600 text-white text-3xl font-bold py-3 px-8 rounded-xl shadow-lg transform transition hover:scale-105 active:scale-95 border-b-4 border-green-700 flex items-center gap-2">
+                Comprobar ✓
+            </button>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- REFERENCIAS AL DOM ---
+            const mesa = document.getElementById('mesa');
+            const selectDificultad = document.getElementById('dificultad');
+            const inputRespuesta = document.getElementById('respuesta');
+            const btnComprobar = document.getElementById('btn-comprobar');
+            const spanRacha = document.getElementById('racha-counter');
+            const divMensaje = document.getElementById('mensaje');
+            const instruccionMesa = document.getElementById('instruccion-mesa');
+
+            // --- ESTADO DEL JUEGO ---
+            let totalActual = 0;
+            let racha = 0;
+            let esperandoSiguiente = false;
+
+            // --- DEFINICIÓN DE DINERO ---
+            // Valores en céntimos para evitar problemas de precisión en JS (ej. 0.1 + 0.2)
+            const valores = {
+                // Billetes
+                'b20': { tipo: 'billete', clase: 'billete-20', valor: 2000, texto: '20€' },
+                'b10': { tipo: 'billete', clase: 'billete-10', valor: 1000, texto: '10€' },
+                'b5':  { tipo: 'billete', clase: 'billete-5',  valor: 500,  texto: '5€' },
+                // Monedas Bimetálicas
+                'm2':  { tipo: 'moneda', clase: 'moneda-2',  valor: 200,  texto: '2', sym: '€' },
+                'm1':  { tipo: 'moneda', clase: 'moneda-1',  valor: 100,  texto: '1', sym: '€' },
+                // Monedas Oro
+                'c50': { tipo: 'moneda-oro', clase: 'moneda-50c', valor: 50, texto: '50', sym: 'c' },
+                'c20': { tipo: 'moneda-oro', clase: 'moneda-20c', valor: 20, texto: '20', sym: 'c' },
+                'c10': { tipo: 'moneda-oro', clase: 'moneda-10c', valor: 10, texto: '10', sym: 'c' },
+                // Monedas Cobre
+                'c5':  { tipo: 'moneda-cobre', clase: 'moneda-5c', valor: 5, texto: '5', sym: 'c' },
+                'c2':  { tipo: 'moneda-cobre', clase: 'moneda-2c', valor: 2, texto: '2', sym: 'c' },
+                'c1':  { tipo: 'moneda-cobre', clase: 'moneda-1c', valor: 1, texto: '1', sym: 'c' }
+            };
+
+            // Conjuntos disponibles por nivel
+            const niveles = {
+                facil:   ['b20', 'b10', 'b5', 'm2', 'm1'],
+                medio:   ['b20', 'b10', 'b5', 'm2', 'm1', 'c50', 'c20', 'c10'],
+                dificil: ['b20', 'b10', 'b5', 'm2', 'm1', 'c50', 'c20', 'c10', 'c5', 'c2', 'c1']
+            };
+
+            // --- STREAMING_CHUNK:Funciones Principales ---
+
+            // Función para obtener un número aleatorio entre min y max
+            function random(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            // Función para calcular una posición que no se superponga demasiado
+            function obtenerPosicionValida(posicionesOcupadas) {
+                let intentos = 0;
+                // Distancia mínima en % (15% es un buen equilibrio para dejar ver los valores)
+                const MIN_DISTANCIA = 15; 
+
+                while (intentos < 50) { // Intentamos 50 veces para no bloquear el navegador
+                    const x = random(5, 80);
+                    const y = random(5, 75);
+                    let superpone = false;
+
+                    // Comprobamos la distancia con todos los elementos ya colocados
+                    for (const pos of posicionesOcupadas) {
+                        const dx = x - pos.x;
+                        const dy = y - pos.y;
+                        const distancia = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distancia < MIN_DISTANCIA) {
+                            superpone = true;
+                            break;
+                        }
+                    }
+
+                    if (!superpone) {
+                        return { x, y };
+                    }
+                    intentos++;
+                }
+
+                // Si por lo que sea no encuentra hueco (muy raro con pocos elementos), lo ponemos aleatorio
+                return { x: random(5, 80), y: random(5, 75) };
+            }
+
+            // Función para crear un elemento HTML de dinero
+            function crearElementoDinero(claveDinero, posicion) {
+                const info = valores[claveDinero];
+                const el = document.createElement('div');
+                el.classList.add('dinero-item');
+
+                if (info.tipo === 'billete') {
+                    el.classList.add('billete', info.clase);
+                    
+                    // Si tienes una imagen propia para este billete, puedes activarla así:
+                    // el.style.backgroundImage = `url('ruta-de-tu-imagen-${claveDinero}.png')`;
+                    // el.textContent = ''; // Limpia el contenido vectorial
+
+                    // Renderizado con detalles realistas (bandera UE, arquitectura y banda holográfica)
+                    const valNum = info.texto.replace('€', '');
+                    el.innerHTML = `
+                        <div class="info-col">
+                            <div class="eu-flag">★</div>
+                            <div class="valor-grande">${valNum}</div>
+                            <span class="text-xs font-mono font-bold opacity-75">EURO</span>
+                        </div>
+                        <svg class="motivo-arquitectonico" width="55" height="45" viewBox="0 0 60 50" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5,45 L5,20 Q30,5 55,20 L55,45" />
+                            <path d="M15,45 L15,25 Q30,15 45,25 L45,45" stroke-dasharray="2,2" />
+                            <circle cx="30" cy="18" r="4" />
+                        </svg>
+                        <div class="holo-band"></div>
+                    `;
+                } else {
+                    // Es moneda con diseño SVG
+                    el.classList.add('moneda', info.tipo, info.clase);
+                    
+                    let svgContent = '';
+                    
+                    if (claveDinero === 'm2') {
+                        svgContent = `
+                        <svg viewBox="0 0 100 100">
+                            <defs>
+                                <radialGradient id="silver-2" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#ffffff"/><stop offset="50%" stop-color="#d1d1d1"/><stop offset="100%" stop-color="#999999"/></radialGradient>
+                                <radialGradient id="gold-2" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#ffeb99"/><stop offset="50%" stop-color="#e6b800"/><stop offset="100%" stop-color="#b38f00"/></radialGradient>
+                            </defs>
+                            <!-- Anillo Exterior Plateado -->
+                            <circle cx="50" cy="50" r="50" fill="url(#silver-2)" />
+                            <!-- Núcleo Dorado -->
+                            <circle cx="50" cy="50" r="34" fill="url(#gold-2)" stroke="#a68a00" stroke-width="0.5" />
+                            <!-- Estrellas decorativas simplificadas -->
+                            <circle cx="50" cy="8" r="2" fill="#777"/><circle cx="50" cy="92" r="2" fill="#777"/><circle cx="8" cy="50" r="2" fill="#777"/><circle cx="92" cy="50" r="2" fill="#777"/>
+                            <circle cx="20" cy="20" r="1.5" fill="#777"/><circle cx="80" cy="80" r="1.5" fill="#777"/><circle cx="20" cy="80" r="1.5" fill="#777"/><circle cx="80" cy="20" r="1.5" fill="#777"/>
+                        </svg>`;
+                    } else if (claveDinero === 'm1') {
+                        svgContent = `
+                        <svg viewBox="0 0 100 100">
+                            <defs>
+                                <radialGradient id="gold-1" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#ffeb99"/><stop offset="50%" stop-color="#e6b800"/><stop offset="100%" stop-color="#b38f00"/></radialGradient>
+                                <radialGradient id="silver-1" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#ffffff"/><stop offset="50%" stop-color="#d1d1d1"/><stop offset="100%" stop-color="#999999"/></radialGradient>
+                            </defs>
+                            <!-- Anillo Exterior Dorado -->
+                            <circle cx="50" cy="50" r="50" fill="url(#gold-1)" />
+                            <!-- Núcleo Plateado -->
+                            <circle cx="50" cy="50" r="34" fill="url(#silver-1)" stroke="#b3b3b3" stroke-width="0.5" />
+                            <!-- Estrellas decorativas -->
+                            <circle cx="50" cy="8" r="2" fill="#b38f00"/><circle cx="50" cy="92" r="2" fill="#b38f00"/><circle cx="8" cy="50" r="2" fill="#b38f00"/><circle cx="92" cy="50" r="2" fill="#b38f00"/>
+                            <circle cx="20" cy="20" r="1.5" fill="#b38f00"/><circle cx="80" cy="80" r="1.5" fill="#b38f00"/><circle cx="20" cy="80" r="1.5" fill="#b38f00"/><circle cx="80" cy="20" r="1.5" fill="#b38f00"/>
+                        </svg>`;
+                    } else if (info.tipo === 'moneda-oro') {
+                        svgContent = `
+                        <svg viewBox="0 0 100 100">
+                            <defs>
+                                <radialGradient id="gold-c" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#ffe066"/><stop offset="50%" stop-color="#cca300"/><stop offset="100%" stop-color="#997a00"/></radialGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="50" fill="url(#gold-c)" />
+                            <circle cx="50" cy="50" r="42" fill="none" stroke="#b38f00" stroke-width="1.5" stroke-dasharray="4 2"/>
+                            <circle cx="50" cy="50" r="38" fill="none" stroke="#b38f00" stroke-width="0.5"/>
+                        </svg>`;
+                    } else if (info.tipo === 'moneda-cobre') {
+                        svgContent = `
+                        <svg viewBox="0 0 100 100">
+                            <defs>
+                                <radialGradient id="copper" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#ff9966"/><stop offset="50%" stop-color="#cc5200"/><stop offset="100%" stop-color="#803300"/></radialGradient>
+                            </defs>
+                            <circle cx="50" cy="50" r="50" fill="url(#copper)" />
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="#993d00" stroke-width="1.5"/>
+                            <circle cx="50" cy="50" r="41" fill="none" stroke="#993d00" stroke-width="0.5"/>
+                        </svg>`;
+                    }
+
+                    el.innerHTML = `
+                        ${svgContent}
+                        <div class="moneda-contenido">
+                            <span class="val">${info.texto}</span>
+                            <span class="sym">${info.sym}</span>
+                        </div>
+                    `;
+                }
+
+                // Usamos la posición validada
+                const posX = posicion.x; 
+                const posY = posicion.y;
+                
+                // Rotación aleatoria para dar naturalidad
+                const rotacion = random(-30, 30);
+
+                el.style.left = `${posX}%`;
+                el.style.top = `${posY}%`;
+                el.style.transform = `rotate(${rotacion}deg)`;
+                
+                // Sobrescribir el transform en hover es complicado si usamos inline styles aquí.
+                // Mejor guardamos la rotación en una variable CSS o data attribute si quisieramos mantenerla en hover.
+                // Para simplificar, en hover la rotación se pierde (queda recto), lo cual es un efecto chulo al "inspeccionar".
+
+                return el;
+            }
+
+            // Función para generar una nueva ronda
+            function generarReto() {
+                // Limpiar mesa
+                mesa.innerHTML = '';
+                instruccionMesa.classList.add('hidden');
+                inputRespuesta.value = '';
+                inputRespuesta.focus();
+                esperandoSiguiente = false;
+                ocultarMensaje();
+
+                const dificultad = selectDificultad.value;
+                const poolPosible = niveles[dificultad];
+                
+                // Cantidad de elementos (entre 3 y 8)
+                const cantidadElementos = random(3, 8);
+                
+                let sumaCentimos = 0;
+                let posicionesOcupadas = [];
+
+                // Generar elementos
+                for (let i = 0; i < cantidadElementos; i++) {
+                    const claveAleatoria = poolPosible[random(0, poolPosible.length - 1)];
+                    
+                    // Calculamos un hueco en la mesa que esté libre
+                    const posicion = obtenerPosicionValida(posicionesOcupadas);
+                    posicionesOcupadas.push(posicion); // Lo guardamos para que el siguiente no lo pise
+
+                    const elementoDom = crearElementoDinero(claveAleatoria, posicion);
+                    mesa.appendChild(elementoDom);
+                    sumaCentimos += valores[claveAleatoria].valor;
+                }
+
+                // Guardar total real en euros (ej. 1250 céntimos -> 12.50)
+                totalActual = sumaCentimos / 100;
+                console.log("Total real generado:", totalActual); // Chivato para desarrollo
+            }
+
+            // --- STREAMING_CHUNK:Lógica de Validación y Feedback ---
+
+            function mostrarMensaje(texto, tipo) {
+                divMensaje.textContent = texto;
+                divMensaje.classList.remove('hidden', 'text-green-500', 'text-red-500', 'text-orange-500');
+                
+                // Reiniciar animación
+                divMensaje.classList.remove('animate-pop');
+                void divMensaje.offsetWidth; // Trigger reflow
+                divMensaje.classList.add('animate-pop');
+
+                if (tipo === 'exito') {
+                    divMensaje.className = "text-5xl font-bold text-green-600 drop-shadow-md animate-pop";
+                } else if (tipo === 'error') {
+                    divMensaje.className = "text-4xl font-bold text-orange-500 drop-shadow-md animate-pop";
+                }
+            }
+
+            function ocultarMensaje() {
+                divMensaje.classList.add('hidden');
+            }
+
+            function comprobarRespuesta() {
+                if (esperandoSiguiente) return;
+
+                let respuestaUsuario = inputRespuesta.value.trim();
+                
+                if (respuestaUsuario === '') return;
+
+                // Reemplazar coma por punto por si acaso
+                respuestaUsuario = respuestaUsuario.replace(',', '.');
+                const valorNumerico = parseFloat(respuestaUsuario);
+
+                if (isNaN(valorNumerico)) {
+                    mostrarMensaje("Escribe un número, por favor", "error");
+                    return;
+                }
+
+                // Comparamos redondeando a 2 decimales para evitar problemas de coma flotante
+                const diferencia = Math.abs(valorNumerico - totalActual);
+                
+                if (diferencia < 0.001) {
+                    // ¡CORRECTO!
+                    esperandoSiguiente = true;
+                    racha++;
+                    spanRacha.textContent = racha;
+                    
+                    const mensajesExito = ["¡Muy bien! 🎉", "¡Excelente! 🌟", "¡Lo tienes! 🚀", "¡Genial! ✨"];
+                    mostrarMensaje(mensajesExito[random(0, mensajesExito.length - 1)], "exito");
+                    
+                    // Generar nuevo tras 2 segundos
+                    setTimeout(generarReto, 2000);
+                } else {
+                    // INCORRECTO
+                    racha = 0; // Opcional: resetear racha al fallar
+                    spanRacha.textContent = racha;
+                    
+                    const mensajesError = ["Casi... ¡Vuelve a contar! 👀", "Mmm, revisa otra vez 🤔", "¡Uy! Por poco. Inténtalo de nuevo 🔄"];
+                    mostrarMensaje(mensajesError[random(0, mensajesError.length - 1)], "error");
+                    
+                    inputRespuesta.select(); // Seleccionar el texto para sobreescribir fácil
+                }
+            }
+
+            // --- STREAMING_CHUNK:Event Listeners ---
+
+            btnComprobar.addEventListener('click', comprobarRespuesta);
+
+            // Permitir usar la tecla Enter
+            inputRespuesta.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    comprobarRespuesta();
+                }
+            });
+
+            // Cambiar dificultad resetea el juego
+            selectDificultad.addEventListener('change', () => {
+                racha = 0;
+                spanRacha.textContent = racha;
+                generarReto();
+            });
+
+            // Iniciar primera ronda al cargar
+            generarReto();
+        });
+    </script>
+</body>
+</html>
