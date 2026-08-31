@@ -13,23 +13,23 @@ El juego principal, "Cuenta el dinero", genera aleatoriamente sobre la pantalla 
 
 Para adaptarse al ritmo de aprendizaje de cada usuario, el juego cuenta con un selector de 3 niveles de dificultad progresiva:
 
-  🟢 Nivel Fácil (Iniciación):
+    🟢 Nivel Fácil (Iniciación):
 
-Elementos: Billetes básicos (5€, 10€, 20€) y monedas enteras (1€ y 2€).
+    Elementos: Billetes básicos (5€, 10€, 20€) y monedas enteras (1€ y 2€).
 
-Objetivo: Familiarizarse con los billetes más comunes y practicar sumas de números enteros sin la complejidad de los decimales.
+    Objetivo: Familiarizarse con los billetes más comunes y practicar sumas de números enteros sin la complejidad de los decimales.
 
-  🟡 Nivel Medio (Introducción a los decimales):
+    🟡 Nivel Medio (Introducción a los decimales):
 
-Elementos: Incluye los elementos del nivel fácil + monedas de céntimos "redondos" (10, 20 y 50 céntimos).
+    Elementos: Incluye los elementos del nivel fácil + monedas de céntimos "redondos" (10, 20 y 50 céntimos).
 
-Objetivo: Aprender a separar conceptualmente los euros de los céntimos y realizar sumas sencillas con decimales acabados en cero.
+    Objetivo: Aprender a separar conceptualmente los euros de los céntimos y realizar sumas sencillas con decimales acabados en cero.
 
-  🔴 Nivel Difícil (Cálculo preciso):
+    🔴 Nivel Difícil (Cálculo preciso):
 
-Elementos: Incluye todo el cono monetario, añadiendo las monedas pequeñas (1, 2 y 5 céntimos).
+    Elementos: Incluye todo el cono monetario, añadiendo las monedas pequeñas (1, 2 y 5 céntimos).
 
-Objetivo: Dominar el cálculo exacto, requiriendo mayor atención al detalle y sumas decimales completas, simulando el cambio exacto en situaciones reales de compra.
+    Objetivo: Dominar el cálculo exacto, requiriendo mayor atención al detalle y sumas decimales completas, simulando el cambio exacto en situaciones reales de compra.
 
 🧠 Aplicación Pedagógica y Accesibilidad Cognitiva
 
